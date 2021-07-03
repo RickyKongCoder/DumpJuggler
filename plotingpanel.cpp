@@ -13,25 +13,25 @@ VPlotingPanel::VPlotingPanel()
 void VPlotingPanel::add_plot(QString graph_name)
 {
     DataPlot *newplot = new DataPlot;
-    QRandomGenerator generator;
-    generator.seed(QTime::currentTime().hour() * QTime::currentTime().hour()
-                   + QTime::currentTime().minute() + QTime::currentTime().second());
-    quint32 color_index = generator.bounded(0, ColorNum - 1);
-    ;
-    qDebug() << color_index << endl;
-    uint32_t rgb = pencolor[color_index];
-    qDebug() << rgb << endl;
-
     set_dataPlot(newplot,
-                 graph_name,
-                 QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther,
-                 QRgba64::fromRgba(quint8(rgb >> 16), quint8(rgb >> 8), quint8(rgb), 255));
-    ;
+                 QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther);
+    add_dataGraph(newplot, graph_name);
 }
 void VPlotingPanel::add_SeperatePlot(QList<QString> plotname_list)
 {
     for (int i = 0; i < plotname_list.size(); i++) {
         add_plot(plotname_list[i]);
+    }
+}
+void VPlotingPanel::add_MergePlot(QList<QString> merge_list)
+{
+    DataPlot *newplot = new DataPlot;
+    set_dataPlot(newplot,
+                 QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther);
+
+    while (!merge_list.isEmpty()) {
+        add_dataGraph(newplot, merge_list.back());
+        merge_list.pop_back();
     }
 }
 void VPlotingPanel::remove_plot(QString name) {
@@ -47,10 +47,7 @@ void VPlotingPanel::setParentWindow(MainWindow *mw)
     parentMW = mw;
 }
 
-DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot,
-                                      QString graph_name,
-                                      const QCP::Interactions &interactions,
-                                      QColor pencolor)
+DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot, const QCP::Interactions &interactions)
 {
     QCPTextElement *title = new QCPTextElement(newplot);
     newplot->setStartTime(QTime::currentTime());
@@ -59,7 +56,6 @@ DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot,
     this->insertWidget(0, newplot);
     QString plot_index = QString::number(plots_ptr.size() + 1);
     QString title_name = QString("Plot") + plot_index;
-
     newplot->setObjectName(title_name);
     newplot->setname(title_name); //at first the graph name is same as var name
     title->setText(title_name);
@@ -68,13 +64,7 @@ DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot,
     qDebug() << "set DataPLot  title_name" << title_name << endl;
     newplot->plotLayout()->insertRow(0);  // insert an empty row above the axis rect
     newplot->plotLayout()->addElement(0, 0, title);
-    newplot->addGraph();  // blue line
-    newplot->graph(0)->setPen(QPen(pencolor));
-    newplot->graph(0)->setName(graph_name);
     newplot->setInteractions(interactions);
-    //    newplot->graph(0)->setScatterStyle(
-    //        QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand() % 14 + 1)));
-
     connect(this, &VPlotingPanel::alterModeToChild, newplot, &DataPlot::alterZoomMode);
     connect(newplot, &DataPlot::pushSelected, this, &VPlotingPanel::pushSelected);
     connect(newplot, &DataPlot::eraseSelected, this, &VPlotingPanel::eraseSelected);
@@ -84,6 +74,13 @@ DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot,
     connect(MergeAction, SIGNAL(triggered()), newplot, SLOT(MergePlots()));
     connect(LegendAction, SIGNAL(triggered()), newplot, SLOT(LegendModeToggle()));
     connect(RemovePlotAction, SIGNAL(triggered()), this, SLOT(RemovePlot()));
+}
+void VPlotingPanel::add_dataGraph(DataPlot *newplot, QString graph_name)
+{
+    newplot->addGraph(); // blue line
+    int new_graphIndex = newplot->graphCount() - 1;
+    newplot->graph(new_graphIndex)->setPen(QPen(randomBrightColor(255)));
+    newplot->graph(new_graphIndex)->setName(graph_name);
 }
 void VPlotingPanel::alterPlotMode()
 {

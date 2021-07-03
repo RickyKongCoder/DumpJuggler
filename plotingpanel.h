@@ -21,10 +21,7 @@ class VPlotingPanel : public QVBoxLayout
     Q_OBJECT;
 
 private:
-    DataPlot *set_dataPlot(DataPlot *newplot,
-                           QString title_name,
-                           const QCP::Interactions &interactions,
-                           QColor pencolor);
+    DataPlot *set_dataPlot(DataPlot *newplot, const QCP::Interactions &interactions);
     void updateDataPlots(DataPlot *dataPlt, QCPRange xRange, QCPRange yRange);
     void alter_plotwidth(DataPlot *, Axis);
     vector<QString> selectedPlots;
@@ -36,6 +33,7 @@ private:
     QAction *MergeAction;
     MainWindow *parentMW;
     void createAction();
+    void add_dataGraph(DataPlot *, QString);
 
 private slots:
     void AutoModeToggle();
@@ -46,6 +44,7 @@ public:
     map<QString, DataPlot *> plots_ptr;
 
     VPlotingPanel();
+
     void setParentWindow(MainWindow *);
 signals:
     void alterShowMode(ZoomMode);
@@ -54,6 +53,7 @@ signals:
 public slots:
     void add_plot(QString);
     void add_SeperatePlot(QList<QString>);
+    void add_MergePlot(QList<QString>);
     void remove_plot(QString);
     void alter_plot_axises(Axis ax, AxisChange change);
     void alterPlotMode();

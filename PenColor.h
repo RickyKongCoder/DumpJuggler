@@ -1,5 +1,11 @@
 #ifndef PENCOLOR_H
 #define PENCOLOR_H
+#include "stdint.h"
+#include <QColor>
+#include <QDebug>
+#include <QList>
+#include <QRandomGenerator>
+#include <QTime>
 #define PenColors(X) \
     X(ff52d5) \
     X(e3e6ff) \
@@ -40,4 +46,5 @@
 #define PenColorHex PenColors(ColorsHex)
 typedef enum { PenColorNames ColorNum } BrightColor;
 extern unsigned int pencolor[];
+QRgba64 randomBrightColor(quint8);
 #endif // PENCOLOR_H
