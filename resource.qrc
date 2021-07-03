@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>1200px-Plus_font_awesome.svg.png</file>
+        <file>image.png</file>
+        <file>minus_111123.png</file>
+        <file>image_vertical.png</file>
+        <file>arrows_.png</file>
+        <file>arrows_exp.png</file>
+        <file>arrows_hor.png</file>
+        <file>arrows_ver_ex.png</file>
+    </qresource>
+</RCC>
