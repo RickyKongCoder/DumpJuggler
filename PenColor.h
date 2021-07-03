@@ -46,5 +46,5 @@
 #define PenColorHex PenColors(ColorsHex)
 typedef enum { PenColorNames ColorNum } BrightColor;
 extern unsigned int pencolor[];
-QRgba64 randomBrightColor(quint8);
+QRgba64 randomBrightColor(quint8, quint32);
 #endif // PENCOLOR_H

@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QRandomGenerator>
 #include <QString>
+#define DEFAULT_COLOR_OFFSET 0
 VPlotingPanel::VPlotingPanel()
 {
     createAction();
@@ -15,7 +16,7 @@ void VPlotingPanel::add_plot(QString graph_name)
     DataPlot *newplot = new DataPlot;
     set_dataPlot(newplot,
                  QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther);
-    add_dataGraph(newplot, graph_name);
+    add_dataGraph(newplot, graph_name, DEFAULT_COLOR_OFFSET);
 }
 void VPlotingPanel::add_SeperatePlot(QList<QString> plotname_list)
 {
@@ -28,10 +29,11 @@ void VPlotingPanel::add_MergePlot(QList<QString> merge_list)
     DataPlot *newplot = new DataPlot;
     set_dataPlot(newplot,
                  QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther);
-
+    quint32 index = 0;
     while (!merge_list.isEmpty()) {
-        add_dataGraph(newplot, merge_list.back());
+        add_dataGraph(newplot, merge_list.back(), index);
         merge_list.pop_back();
+        index++;
     }
 }
 void VPlotingPanel::remove_plot(QString name) {
@@ -75,11 +77,11 @@ DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot, const QCP::Interactions
     connect(LegendAction, SIGNAL(triggered()), newplot, SLOT(LegendModeToggle()));
     connect(RemovePlotAction, SIGNAL(triggered()), this, SLOT(RemovePlot()));
 }
-void VPlotingPanel::add_dataGraph(DataPlot *newplot, QString graph_name)
+void VPlotingPanel::add_dataGraph(DataPlot *newplot, QString graph_name, quint32 seed_offset)
 {
     newplot->addGraph(); // blue line
     int new_graphIndex = newplot->graphCount() - 1;
-    newplot->graph(new_graphIndex)->setPen(QPen(randomBrightColor(255)));
+    newplot->graph(new_graphIndex)->setPen(QPen(randomBrightColor(255, seed_offset)));
     newplot->graph(new_graphIndex)->setName(graph_name);
 }
 void VPlotingPanel::alterPlotMode()
@@ -106,21 +108,14 @@ void VPlotingPanel::realtimeDataSlot()
         }
 
         bool foundRange;
+
         if (curr_plot->getZoomMode() == AUTO) {
             curr_plot->xAxis->setRangeUpper(key);
             curr_plot->xAxis->setRangeLower(key - curr_plot->x_width);
-            curr_plot->rangeY.lower = -abs(curr_plot->graph(0)
-                                               ->getValueRange(foundRange,
-                                                               QCP::sdBoth,
-                                                               curr_plot->rangeX)
-                                               .lower)
-                                      - curr_plot->y_width * 0.07;
-            curr_plot->rangeY.upper = abs(curr_plot->graph(0)
-                                              ->getValueRange(foundRange,
-                                                              QCP::sdBoth,
-                                                              curr_plot->rangeX)
-                                              .upper)
-                                      + curr_plot->y_width * 0.07;
+            curr_plot->rangeY.lower = curr_plot->getYRangeMin();
+
+            curr_plot->rangeY.upper = curr_plot->getYRangeMax();
+
             curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
         }
         updateDataPlots(curr_plot, curr_plot->xAxis->range(), curr_plot->yAxis->range());

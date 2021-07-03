@@ -77,6 +77,9 @@ public:
     void select();
     void deselect();
     void setStartTime(QTime time);
+    float getYRangeMax();
+    float getYRangeMin();
+
     ZoomMode getZoomMode();
     QTime& getStartTime();
     void merge(DataPlot*plt);

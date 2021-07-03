@@ -126,6 +126,31 @@ void DataPlot::LegendModeToggle()
         this->legend->setVisible(!this->legend->visible());
     }
 }
+float DataPlot::getYRangeMax()
+{
+    float maxY = 0;
+    for (int i = 0; i < this->graphCount(); i++) {
+        bool foundRange = true;
+        float upper = this->graph(i)->getValueRange(foundRange, QCP::sdBoth, this->rangeX).upper;
+        if (upper > maxY) {
+            maxY = upper;
+        };
+    }
+    return abs(maxY) + this->y_width * 0.07;
+}
+float DataPlot::getYRangeMin()
+{
+    float minY = 0;
+    for (int i = 0; i < this->graphCount(); i++) {
+        bool foundRange = true;
+        float lower = this->graph(i)->getValueRange(foundRange, QCP::sdBoth, this->rangeX).lower;
+        if (lower < minY) {
+            minY = lower;
+        };
+    }
+    return -abs(minY) - this->y_width * 0.07;
+}
+
 //void DataPlot::setPanel(VPlotingPanel *vpp)
 //{
 //    panel = vpp;

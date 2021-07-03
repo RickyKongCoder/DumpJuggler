@@ -33,7 +33,7 @@ private:
     QAction *MergeAction;
     MainWindow *parentMW;
     void createAction();
-    void add_dataGraph(DataPlot *, QString);
+    void add_dataGraph(DataPlot *, QString, quint32);
 
 private slots:
     void AutoModeToggle();

@@ -2,11 +2,11 @@
 
 unsigned int pencolor[] = {PenColorHex};
 /*Generate random birght color from bright color table*/
-QRgba64 randomBrightColor(quint8 transparency)
+QRgba64 randomBrightColor(quint8 transparency, quint32 seed_offset)
 {
     QRandomGenerator generator;
     generator.seed(QTime::currentTime().hour() * QTime::currentTime().hour()
-                   + QTime::currentTime().minute() + QTime::currentTime().second());
+                   + QTime::currentTime().minute() + QTime::currentTime().second() + seed_offset);
     quint32 color_index = generator.bounded(0, ColorNum - 1);
     ;
     qDebug() << color_index << endl;
