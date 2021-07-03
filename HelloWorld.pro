@@ -43,7 +43,8 @@ HEADERS += \
 
 FORMS += \
     mainwindow.ui \
-    mainwindow_copy.ui
+    mainwindow_copy.ui \
+    relationPlotdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

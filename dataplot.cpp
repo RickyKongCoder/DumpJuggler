@@ -150,7 +150,19 @@ float DataPlot::getYRangeMin()
     }
     return -abs(minY) - this->y_width * 0.07;
 }
+void DataPlot::addVar(QString name)
+{
+    varNames.push_back(name);
+};
+void DataPlot::removeVar(QString name)
+{
+    varNames.removeAll(name);
+}
 
+QList<QString> DataPlot::getVarNames()
+{
+    return varNames;
+}
 //void DataPlot::setPanel(VPlotingPanel *vpp)
 //{
 //    panel = vpp;

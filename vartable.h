@@ -16,7 +16,10 @@ private:
     QAction *Plot;
     QAction *Plot_Seperate;
     QAction *Plot_Together;
-    QAction *Relation_Plot;
+    //  QAction *Relation_Plot;
+    QAction *DirectRelational;
+    QAction *SwitchedRelational;
+
     void createAction();
     QList<QTableWidgetItem *> getColumnSelectedItem(int col);
     QList<QString> getColumnSelectedText(int col);
@@ -34,7 +37,7 @@ signals:
     void remove_plot(QString);
     void add_plot(QString,QColor);
     void singleplotSignal(QString, QColor);
-    void relationalplotSignal(QList<QString>, QColor);
+    void relationalplotSignal(QList<QString>);
     void mergeplotSignal(QList<QString>, QColor);
     void seperateplotSignal(QList<QString>, QColor);
 public slots:
@@ -44,6 +47,8 @@ public slots:
     void Merge_Plot();
     void Seperate_Plot();
     void Single_Plot();
+    void DirectRelationalPlot();
+    void SwitchedRelationalPlot();
 };
 
 #endif // VARTABLE_H

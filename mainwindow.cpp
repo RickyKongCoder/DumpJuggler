@@ -62,6 +62,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             SIGNAL(mergeplotSignal(QList<QString>, QColor)),
             vdataplot,
             SLOT(add_MergePlot(QList<QString>)));
+    connect(varTable1,
+            SIGNAL(relationalplotSignal(QList<QString>)),
+            vdataplot,
+            SLOT(add_RelationPlot(QList<QString>)));
     connect(varTable1, SIGNAL(remove_plot(QString)), vdataplot, SLOT(remove_plot(QString)));
     connect(this, &MainWindow::init_serial_signal, m_serial, &SerialHandler::InitSlot);
     connect(this,

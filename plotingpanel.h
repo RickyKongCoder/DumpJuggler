@@ -21,7 +21,9 @@ class VPlotingPanel : public QVBoxLayout
     Q_OBJECT;
 
 private:
-    DataPlot *set_dataPlot(DataPlot *newplot, const QCP::Interactions &interactions);
+    DataPlot *set_dataPlot(DataPlot *newplot,
+                           const QCP::Interactions &interactions,
+                           PlotMode plt_mode = Realtime);
     void updateDataPlots(DataPlot *dataPlt, QCPRange xRange, QCPRange yRange);
     void alter_plotwidth(DataPlot *, Axis);
     vector<QString> selectedPlots;
@@ -34,7 +36,9 @@ private:
     MainWindow *parentMW;
     void createAction();
     void add_dataGraph(DataPlot *, QString, quint32);
-
+    void add_relationGraph(DataPlot *newplot, QList<QString> name_list);
+    void realTimeUpdate(DataPlot *curr_plot, double key);
+    void relationUpdate(DataPlot *curr_plot, double key);
 private slots:
     void AutoModeToggle();
     void ManualModeToggle();
@@ -54,6 +58,7 @@ public slots:
     void add_plot(QString);
     void add_SeperatePlot(QList<QString>);
     void add_MergePlot(QList<QString>);
+    void add_RelationPlot(QList<QString>);
     void remove_plot(QString);
     void alter_plot_axises(Axis ax, AxisChange change);
     void alterPlotMode();

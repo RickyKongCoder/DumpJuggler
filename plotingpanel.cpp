@@ -36,6 +36,14 @@ void VPlotingPanel::add_MergePlot(QList<QString> merge_list)
         index++;
     }
 }
+void VPlotingPanel::add_RelationPlot(QList<QString> relation_list)
+{
+    DataPlot *newplot = new DataPlot;
+    set_dataPlot(newplot,
+                 QCP::iRangeZoom | QCP::iRangeDrag | QCP::iSelectLegend | QCP::iSelectOther,
+                 Relation);
+    add_relationGraph(newplot, relation_list);
+}
 void VPlotingPanel::remove_plot(QString name) {
     this->removeWidget(plots_ptr[name]);
 
@@ -49,7 +57,9 @@ void VPlotingPanel::setParentWindow(MainWindow *mw)
     parentMW = mw;
 }
 
-DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot, const QCP::Interactions &interactions)
+DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot,
+                                      const QCP::Interactions &interactions,
+                                      PlotMode plt_mode)
 {
     QCPTextElement *title = new QCPTextElement(newplot);
     newplot->setStartTime(QTime::currentTime());
@@ -67,6 +77,7 @@ DataPlot *VPlotingPanel::set_dataPlot(DataPlot *newplot, const QCP::Interactions
     newplot->plotLayout()->insertRow(0);  // insert an empty row above the axis rect
     newplot->plotLayout()->addElement(0, 0, title);
     newplot->setInteractions(interactions);
+    newplot->setMode(plt_mode);
     connect(this, &VPlotingPanel::alterModeToChild, newplot, &DataPlot::alterZoomMode);
     connect(newplot, &DataPlot::pushSelected, this, &VPlotingPanel::pushSelected);
     connect(newplot, &DataPlot::eraseSelected, this, &VPlotingPanel::eraseSelected);
@@ -82,11 +93,45 @@ void VPlotingPanel::add_dataGraph(DataPlot *newplot, QString graph_name, quint32
     newplot->addGraph(); // blue line
     int new_graphIndex = newplot->graphCount() - 1;
     newplot->graph(new_graphIndex)->setPen(QPen(randomBrightColor(255, seed_offset)));
+    newplot->addVar(graph_name);
     newplot->graph(new_graphIndex)->setName(graph_name);
+}
+void VPlotingPanel::add_relationGraph(DataPlot *newplot, QList<QString> name_list)
+{
+    newplot->addGraph();
+    newplot->graph(newplot->graphCount() - 1)
+        ->setPen(QPen(randomBrightColor(255, DEFAULT_COLOR_OFFSET)));
+    while (!name_list.isEmpty()) {
+        newplot->addVar(name_list.back());
+        qDebug() << name_list.back() << endl;
+        name_list.pop_back();
+    }
 }
 void VPlotingPanel::alterPlotMode()
 {
     //pretty much useless
+}
+void VPlotingPanel::realTimeUpdate(DataPlot *curr_plot, double key)
+{
+    if (key - curr_plot->getLastKey() > 0.002) // at most add point every 2 ms
+    {
+        for (int index = 0; index < curr_plot->graphCount(); index++) {
+            curr_plot->graph(index)
+                ->addData(key, var_container.content()[curr_plot->graph(index)->name()].get_val());
+        }
+
+        curr_plot->setLastKey(key);
+    }
+}
+void VPlotingPanel::relationUpdate(DataPlot *curr_plot, double key)
+{
+    if (key - curr_plot->getLastKey() > 0.002) // at most add point every 2 ms
+    {
+        float x_val = var_container.content()[curr_plot->getVarNames()[0]].get_val();
+        float y_val = var_container.content()[curr_plot->getVarNames()[1]].get_val();
+        curr_plot->graph(0)->addData(x_val, y_val);
+        curr_plot->setLastKey(key);
+    }
 }
 void VPlotingPanel::realtimeDataSlot()
 {
@@ -95,29 +140,31 @@ void VPlotingPanel::realtimeDataSlot()
     for (map<QString, DataPlot *>::const_iterator i = plots_ptr.begin(); i != plots_ptr.end(); i++) {
         DataPlot *curr_plot = i->second;
         // qDebug() << "Value added |" << var_container.content()[i->first].get_val() << endl;
-        double key = curr_plot->getStartTime().elapsed()
-                     / 1000.0;                     // time elapsed since start of demo, in seconds
-        if (key - curr_plot->getLastKey() > 0.002) // at most add point every 2 ms
-        {
-            for (int index = 0; index < curr_plot->graphCount(); index++) {
-                curr_plot->graph(index)
-                    ->addData(key,
-                              var_container.content()[curr_plot->graph(index)->name()].get_val());
+        // time elapsed since start of demo, in seconds
+        if (curr_plot->getMode() == Realtime) {
+            double key = curr_plot->getStartTime().elapsed() / 1000.0;
+            realTimeUpdate(curr_plot, key);
+
+            if (curr_plot->getZoomMode() == AUTO) {
+                curr_plot->xAxis->setRangeUpper(key);
+                curr_plot->xAxis->setRangeLower(key - curr_plot->x_width);
+                curr_plot->rangeY.lower = curr_plot->getYRangeMin();
+                curr_plot->rangeY.upper = curr_plot->getYRangeMax();
+                curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
             }
-            curr_plot->setLastKey(key);
+        } else if (curr_plot->getMode() == Relation) {
+            relationUpdate(curr_plot, curr_plot->xAxis->range().upper);
+
+            if (curr_plot->getZoomMode() == AUTO) {
+                curr_plot->xAxis->setRangeUpper(curr_plot->xAxis->range().upper);
+                curr_plot->xAxis->setRangeLower(curr_plot->xAxis->range().upper
+                                                - curr_plot->x_width);
+                curr_plot->rangeY.lower = curr_plot->getYRangeMin();
+                curr_plot->rangeY.upper = curr_plot->getYRangeMax();
+                curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
+            }
         }
 
-        bool foundRange;
-
-        if (curr_plot->getZoomMode() == AUTO) {
-            curr_plot->xAxis->setRangeUpper(key);
-            curr_plot->xAxis->setRangeLower(key - curr_plot->x_width);
-            curr_plot->rangeY.lower = curr_plot->getYRangeMin();
-
-            curr_plot->rangeY.upper = curr_plot->getYRangeMax();
-
-            curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
-        }
         updateDataPlots(curr_plot, curr_plot->xAxis->range(), curr_plot->yAxis->range());
         curr_plot->replot();
     }

@@ -34,6 +34,7 @@ ZoomMode mode = AUTO;
 QTime startTime;
 QAction *AutoModeAction;
 QAction *ManualModeAction;
+QList<QString> varNames;
 void createAction();
 float lastPointKey;
 signals:
@@ -79,7 +80,9 @@ public:
     void setStartTime(QTime time);
     float getYRangeMax();
     float getYRangeMin();
-
+    void addVar(QString);
+    void removeVar(QString);
+    QList<QString> getVarNames();
     ZoomMode getZoomMode();
     QTime& getStartTime();
     void merge(DataPlot*plt);
