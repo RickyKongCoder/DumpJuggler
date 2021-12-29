@@ -132,7 +132,7 @@ float DataPlot::getYRangeMax()
     for (int i = 0; i < this->graphCount(); i++) {
         bool foundRange = true;
         float upper = this->graph(i)->getValueRange(foundRange, QCP::sdBoth, this->rangeX).upper;
-        if (upper > maxY) {
+        if (upper > maxY || i == 0) {
             maxY = upper;
         };
     }
@@ -144,11 +144,36 @@ float DataPlot::getYRangeMin()
     for (int i = 0; i < this->graphCount(); i++) {
         bool foundRange = true;
         float lower = this->graph(i)->getValueRange(foundRange, QCP::sdBoth, this->rangeX).lower;
-        if (lower < minY) {
+        if (lower < minY || i == 0) {
             minY = lower;
         };
     }
-    return -abs(minY) - this->y_width * 0.07;
+    return (minY) - this->y_width * 0.07;
+}
+float DataPlot::getXRangeMax()
+{
+    float maxX = 0;
+    for (int i = 0; i < this->graphCount(); i++) {
+        bool foundRange = true;
+        float upper = this->graph(i)->getKeyRange(foundRange, QCP::sdBoth).upper;
+        if (upper > maxX || i == 0) {
+            maxX = upper;
+        };
+    }
+    return abs(maxX);
+}
+float DataPlot::getXRangeMin()
+{
+    float minX = 0;
+
+    for (int i = 0; i < this->graphCount(); i++) {
+        bool foundRange = true;
+        float lower = this->graph(i)->getKeyRange(foundRange, QCP::sdBoth).lower;
+        if (lower < minX || i == 0) {
+            minX = lower;
+        };
+    }
+    return abs(minX);
 }
 void DataPlot::addVar(QString name)
 {

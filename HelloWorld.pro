@@ -20,6 +20,7 @@ SOURCES += \
     plotingpanel.cpp \
     qcustomplot.cpp \
     serialhandler.cpp \
+    sockethandler.cpp \
     uithread.cpp \
     var_processor.cpp \
     variables.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     plotingpanel.h \
     qcustomplot.h \
     serialhandler.h \
+    sockethandler.h \
     uithread.h \
     var_processor.h \
     variables.h \

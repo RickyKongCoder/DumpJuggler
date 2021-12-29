@@ -80,6 +80,8 @@ public:
     void setStartTime(QTime time);
     float getYRangeMax();
     float getYRangeMin();
+    float getXRangeMax();
+    float getXRangeMin();
     void addVar(QString);
     void removeVar(QString);
     QList<QString> getVarNames();

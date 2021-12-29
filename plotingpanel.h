@@ -16,6 +16,8 @@ class MainWindow;
 #define XWIDTH_INCRET_RATIO 0.07;
 #define YWIDTH_INCRET_RATIO 0.07;
 
+#define XAXIS_INDEX 1
+#define YAXIS_INDEX 0
 class VPlotingPanel : public QVBoxLayout
 {
     Q_OBJECT;

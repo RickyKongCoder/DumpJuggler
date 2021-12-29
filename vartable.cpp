@@ -26,7 +26,7 @@ void VarTable::createAction()
 
     DirectRelational = new QAction("", this);
     connect(DirectRelational, SIGNAL(triggered()), this, SLOT(DirectRelationalPlot()));
-    SwitchedRelational = new QAction("", this);
+    SwitchedRelational = new QAction(".", this);
     connect(SwitchedRelational, SIGNAL(triggered()), this, SLOT(SwitchedRelationalPlot()));
 }
 void VarTable::on_itemChanged(QTableWidgetItem *item) {
@@ -98,9 +98,10 @@ void VarTable::contextMenuEvent(QContextMenuEvent *event)
     QList<QString> select_varName = getColumnSelectedText(0);
     QMenu menu;
     QMenu relation{"Relation Plot"};
-    QString directAction_ = select_varName[0] + " over " + select_varName[1];
-    QString switchedAction_ = select_varName[1] + " over " + select_varName[0];
+
     if (select_varName.size() > 1) {
+        QString directAction_ = select_varName[0] + " over " + select_varName[1];
+        QString switchedAction_ = select_varName[1] + " over " + select_varName[0];
         menu.addAction(Plot_Seperate);
         menu.addAction(Plot_Together);
         if (select_varName.size() == 2) {
@@ -143,15 +144,17 @@ void VarTable::Seperate_Plot()
 void VarTable::DirectRelationalPlot()
 {
     QList<QString> select_varName = getColumnSelectedText(0);
-
+    qDebug() << select_varName[0] << "|" << select_varName[1] << endl;
     emit relationalplotSignal(select_varName);
 }
 void VarTable::SwitchedRelationalPlot()
 {
     QList<QString> select_varName = getColumnSelectedText(0);
-
+    qDebug() << select_varName[0] << '|' << select_varName[1] << endl;
     QString name2 = select_varName[1];
     select_varName[1] = select_varName[0];
     select_varName[0] = name2;
+    qDebug() << select_varName[0] << '|' << select_varName[1] << endl;
+
     emit relationalplotSignal(select_varName);
 }

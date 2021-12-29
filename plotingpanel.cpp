@@ -101,9 +101,10 @@ void VPlotingPanel::add_relationGraph(DataPlot *newplot, QList<QString> name_lis
     newplot->addGraph();
     newplot->graph(newplot->graphCount() - 1)
         ->setPen(QPen(randomBrightColor(255, DEFAULT_COLOR_OFFSET)));
+    newplot->xAxis->setLabel(name_list[XAXIS_INDEX]);
+    newplot->yAxis->setLabel(name_list[YAXIS_INDEX]);
     while (!name_list.isEmpty()) {
         newplot->addVar(name_list.back());
-        qDebug() << name_list.back() << endl;
         name_list.pop_back();
     }
 }
@@ -127,6 +128,11 @@ void VPlotingPanel::relationUpdate(DataPlot *curr_plot, double key)
 {
     if (key - curr_plot->getLastKey() > 0.002) // at most add point every 2 ms
     {
+        //        qDebug() << "inrealtionUpdate_X"
+        //                 << var_container.content()[curr_plot->getVarNames()[0]].get_val() << "|";
+        //        qDebug() << "inrealtionUpdate_Y"
+        //                 << var_container.content()[curr_plot->getVarNames()[1]].get_val() << endl;
+
         float x_val = var_container.content()[curr_plot->getVarNames()[0]].get_val();
         float y_val = var_container.content()[curr_plot->getVarNames()[1]].get_val();
         curr_plot->graph(0)->addData(x_val, y_val);
@@ -141,8 +147,9 @@ void VPlotingPanel::realtimeDataSlot()
         DataPlot *curr_plot = i->second;
         // qDebug() << "Value added |" << var_container.content()[i->first].get_val() << endl;
         // time elapsed since start of demo, in seconds
+        double key = curr_plot->getStartTime().elapsed() / 1000.0;
+
         if (curr_plot->getMode() == Realtime) {
-            double key = curr_plot->getStartTime().elapsed() / 1000.0;
             realTimeUpdate(curr_plot, key);
 
             if (curr_plot->getZoomMode() == AUTO) {
@@ -153,12 +160,11 @@ void VPlotingPanel::realtimeDataSlot()
                 curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
             }
         } else if (curr_plot->getMode() == Relation) {
-            relationUpdate(curr_plot, curr_plot->xAxis->range().upper);
+            relationUpdate(curr_plot, key);
 
             if (curr_plot->getZoomMode() == AUTO) {
-                curr_plot->xAxis->setRangeUpper(curr_plot->xAxis->range().upper);
-                curr_plot->xAxis->setRangeLower(curr_plot->xAxis->range().upper
-                                                - curr_plot->x_width);
+                curr_plot->xAxis->setRangeUpper(curr_plot->getXRangeMax());
+                curr_plot->xAxis->setRangeLower(curr_plot->getXRangeMin());
                 curr_plot->rangeY.lower = curr_plot->getYRangeMin();
                 curr_plot->rangeY.upper = curr_plot->getYRangeMax();
                 curr_plot->yAxis->setRange(curr_plot->rangeY.lower, curr_plot->rangeY.upper);
